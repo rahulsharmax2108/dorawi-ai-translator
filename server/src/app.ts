@@ -23,8 +23,8 @@ app.use(
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Healthcheck & System Status
-app.get('/api/health', (req, res) => {
+// Healthcheck & System Status Handler
+const healthHandler = (req: express.Request, res: express.Response) => {
   const apiKeyOverride = (req.headers['x-gemini-api-key'] as string) || undefined;
   const hasKey = geminiService.hasApiKey(apiKeyOverride);
   const docs = vectorStore.getDocuments();
@@ -40,12 +40,20 @@ app.get('/api/health', (req, res) => {
       chunkCount: chunks.length,
     },
   });
-});
+};
 
-// Feature Routes
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
+
+// Feature Routes - support both with and without /api prefix
 app.use('/api/documents', documentsRouter);
+app.use('/documents', documentsRouter);
+
 app.use('/api/rag', ragRouter);
+app.use('/rag', ragRouter);
+
 app.use('/api/translate', translateRouter);
+app.use('/translate', translateRouter);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

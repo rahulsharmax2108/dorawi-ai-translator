@@ -11,9 +11,8 @@ import {
   Clock,
   Layers,
   RefreshCw,
-  SlidersHorizontal,
 } from 'lucide-react';
-import { DocumentMetadata, Language, TranslationResult } from '../types';
+import { DocumentMetadata, Language, TranslationResult, DEFAULT_LANGUAGES } from '../types';
 import { api } from '../services/api';
 
 interface TranslatorWorkstationProps {
@@ -32,14 +31,23 @@ export const TranslatorWorkstation: React.FC<TranslatorWorkstationProps> = ({
   const [targetLang, setTargetLang] = useState('Spanish');
   const [domain, setDomain] = useState<'general' | 'technical' | 'legal' | 'medical' | 'business' | 'creative'>('technical');
   const [tone, setTone] = useState<'professional' | 'casual' | 'academic' | 'concise' | 'fluent'>('professional');
-  const [languages, setLanguages] = useState<Language[]>([]);
+  const [languages, setLanguages] = useState<Language[]>(DEFAULT_LANGUAGES);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationResult, setTranslationResult] = useState<TranslationResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [docPicker, setDocPicker] = useState<string>(selectedDocId || '');
 
   useEffect(() => {
-    api.getLanguages().then(setLanguages).catch(console.error);
+    api
+      .getLanguages()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setLanguages(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Using default language set:', err);
+      });
   }, []);
 
   const handleDocSelect = async (docId: string) => {
@@ -107,7 +115,7 @@ export const TranslatorWorkstation: React.FC<TranslatorWorkstationProps> = ({
           <select
             value={docPicker}
             onChange={(e) => handleDocSelect(e.target.value)}
-            className="neu-input px-3.5 py-2 rounded-xl text-xs font-medium text-slate-800 cursor-pointer"
+            className="neu-input px-3.5 py-2 rounded-xl text-xs font-medium text-slate-800 cursor-pointer min-w-[150px]"
           >
             <option value="">Custom Text Input</option>
             {documents.map((d) => (
@@ -126,7 +134,7 @@ export const TranslatorWorkstation: React.FC<TranslatorWorkstationProps> = ({
             <select
               value={targetLang}
               onChange={(e) => setTargetLang(e.target.value)}
-              className="neu-input px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-800 cursor-pointer"
+              className="neu-input px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-800 cursor-pointer min-w-[150px]"
             >
               {languages.map((l) => (
                 <option key={l.code} value={l.name}>
@@ -142,7 +150,7 @@ export const TranslatorWorkstation: React.FC<TranslatorWorkstationProps> = ({
             <select
               value={domain}
               onChange={(e: any) => setDomain(e.target.value)}
-              className="neu-input px-3 py-2 rounded-xl text-xs font-medium text-slate-800 cursor-pointer capitalize"
+              className="neu-input px-3 py-2 rounded-xl text-xs font-medium text-slate-800 cursor-pointer capitalize min-w-[150px]"
             >
               <option value="technical">Technical / Engineering</option>
               <option value="legal">Legal & Compliance</option>
@@ -159,7 +167,7 @@ export const TranslatorWorkstation: React.FC<TranslatorWorkstationProps> = ({
             <select
               value={tone}
               onChange={(e: any) => setTone(e.target.value)}
-              className="neu-input px-3 py-2 rounded-xl text-xs font-medium text-slate-800 cursor-pointer capitalize"
+              className="neu-input px-3 py-2 rounded-xl text-xs font-medium text-slate-800 cursor-pointer capitalize min-w-[130px]"
             >
               <option value="professional">Professional</option>
               <option value="academic">Academic</option>
