@@ -1,15 +1,21 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build:vercel",
-  "outputDirectory": "client/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "client": {
+      "root": "client/"
+    },
+    "server": {
+      "root": "server/"
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
+      "source": "/api/:path*",
+      "destination": { "service": "server" }
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/((?!api).*)",
+      "destination": { "service": "client" }
     }
   ]
 }
