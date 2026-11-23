@@ -3,6 +3,8 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { documentsRouter } from './routes/documents.js';
 import { ragRouter } from './routes/rag.js';
 import { translateRouter } from './routes/translate.js';
@@ -10,6 +12,9 @@ import { geminiService } from './services/gemini.js';
 import { vectorStore } from './services/vectorStore.js';
 
 export const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // CORS setup
 app.use(
@@ -54,6 +59,27 @@ app.use('/rag', ragRouter);
 
 app.use('/api/translate', translateRouter);
 app.use('/translate', translateRouter);
+
+// Serve Vite frontend static assets from client/dist
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
+app.use(express.static(clientDistPath));
+
+// For all other routes, serve index.html (SPA Fallback)
+app.get('*', (req, res, next) => {
+  if (
+    req.path.startsWith('/api') ||
+    req.path.startsWith('/documents') ||
+    req.path.startsWith('/rag') ||
+    req.path.startsWith('/translate') ||
+    req.path.startsWith('/health')
+  ) {
+    return next();
+  }
+  const indexPath = path.join(clientDistPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) next();
+  });
+});
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

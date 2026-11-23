@@ -1,22 +1,15 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "client": {
-      "root": "client/"
-    },
-    "server": {
-      "root": "server/",
-      "entrypoint": "src/index.ts"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": { "service": "server" }
-    },
-    {
-      "source": "/((?!api).*)",
-      "destination": { "service": "client" }
+      "src": "/(.*)",
+      "dest": "api/index.ts"
     }
   ]
 }
